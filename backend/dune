@@ -1,0 +1,4 @@
+(executable
+ (public_name oc-chat-backend)
+ (name main)
+ (libraries oc_chat_common core async async_rpc_websocket))

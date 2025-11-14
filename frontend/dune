@@ -1,0 +1,7 @@
+(executable
+ (public_name oc-chat-frontend)
+ (name main)
+ (libraries oc_chat_common bonsai.web virtual_dom)
+ (preprocess
+  (pps ppx_jane bonsai.ppx_bonsai ppx_css))
+ (modes exe js))

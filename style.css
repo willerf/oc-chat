@@ -1,0 +1,168 @@
+/* ===== Reset ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ===== Page background ===== */
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background: #020617;           /* dark navy */
+  color: #e5e7eb;
+  min-height: 100vh;
+}
+
+/* ===== Main app container ===== */
+/* This targets your root:
+   <body>
+     <div tabindex="0" ...>   <-- here
+       ...
+*/
+body > div:first-of-type {
+  width: 75vw;                   /* use the middle ~75% of screen */
+  max-width: 960px;
+  margin: 3rem auto;             /* center horizontally with top/bottom margin */
+  text-align: center;            /* center all text inside */
+}
+
+/* === GLOBAL vertical spacing in the app === */
+/* Any element inside that root div that has a previous sibling
+   gets top margin -> vertical gaps between h1, input, buttons, etc. */
+body > div:first-of-type * + * {
+  margin-top: 1.5rem;            /* change this for more/less spacing */
+}
+
+/* ===== Headings & text ===== */
+h1,
+h2,
+h3 {
+  color: #f9fafb;
+  font-weight: 800;
+}
+
+p,
+label,
+span {
+  color: #e5e7eb;
+  font-size: 0.95rem;
+}
+
+/* ===== Inputs / text boxes / selects ===== */
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Styled controls */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="search"],
+textarea,
+select {
+  display: block;
+  width: 100%;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+
+  padding: 0.7rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid #374151;
+  background: #020617;
+  color: #e5e7eb;
+
+  text-align: center;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+/* Focus state */
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.45);
+  background-color: #020617;
+}
+
+/* Textareas */
+textarea {
+  min-height: 4.5rem;
+  resize: vertical;
+}
+
+/* ===== Buttons ===== */
+
+button {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+
+  padding: 0.9rem 1.2rem;
+  border-radius: 999px;
+  border: none;
+  background: radial-gradient(circle at 0 0, #1d4ed8, #1e40af);
+  color: #f9fafb;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+
+  box-shadow:
+    0 18px 35px rgba(15, 23, 42, 0.9),
+    0 0 40px rgba(37, 99, 235, 0.45);
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease,
+    filter 0.1s ease;
+}
+
+/* Hover/active */
+button:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow:
+    0 24px 45px rgba(15, 23, 42, 0.95),
+    0 0 55px rgba(37, 99, 235, 0.6);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow:
+    0 12px 24px rgba(15, 23, 42, 0.8),
+    0 0 30px rgba(37, 99, 235, 0.4);
+}
+
+/* Disabled */
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Optional secondary button */
+button.secondary {
+  background: #111827;
+  box-shadow: none;
+}
+
+button.secondary:hover {
+  filter: none;
+  background: #1f2937;
+}

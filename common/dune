@@ -1,0 +1,5 @@
+(library
+ (name oc_chat_common)
+ (libraries core async_kernel async_rpc_kernel polling_state_rpc)
+ (preprocess
+  (pps ppx_jane)))
