@@ -12,7 +12,10 @@ module Sign_up : sig
   end
 
   module Response : sig
-    type t = unit Or_error.Stable.V2.t [@@deriving bin_io]
+    type t =
+      | Ok
+      | Username_taken
+    [@@deriving bin_io]
   end
 
   val rpc : (Query.t, Response.t) Rpc.Rpc.t
@@ -28,7 +31,11 @@ module Login : sig
   end
 
   module Response : sig
-    type t = Types.User.Stable.V1.t Or_error.Stable.V2.t [@@deriving bin_io]
+    type t =
+      | Ok of Types.User.Stable.V1.t
+      | Unknown_username
+      | Incorrect_password
+    [@@deriving bin_io]
   end
 
   val rpc : (Query.t, Response.t) Rpc.Rpc.t
@@ -74,7 +81,10 @@ module Create_conversation : sig
   end
 
   module Response : sig
-    type t = unit Or_error.Stable.V2.t [@@deriving bin_io]
+    type t =
+      | Ok
+      | Conversation_name_taken
+    [@@deriving bin_io]
   end
 
   val rpc : (Query.t, Response.t) Rpc.Rpc.t
@@ -90,7 +100,10 @@ module Add_conversation_user : sig
   end
 
   module Response : sig
-    type t = unit Or_error.Stable.V2.t [@@deriving bin_io]
+    type t =
+      | Ok
+      | Unknown_conversation
+    [@@deriving bin_io]
   end
 
   val rpc : (Query.t, Response.t) Rpc.Rpc.t

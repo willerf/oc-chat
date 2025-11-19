@@ -11,22 +11,21 @@ let start ~port =
       ~implementations:
         [ Rpc.Rpc.implement Protocol.Sign_up.rpc (fun _ { user_id; user_password } ->
             (match State.mem_user state user_id with
-             | true ->
-               Or_error.error_string ("Username \"" ^ user_id ^ "\" already taken!")
+             | true -> Protocol.Sign_up.Response.Username_taken
              | false ->
                let new_user : Types.User.t =
                  { user_id; user_password; conversations = [] }
                in
                State.add_user_exn state new_user;
-               Ok ())
+               Ok)
             |> return)
         ; Rpc.Rpc.implement Protocol.Login.rpc (fun _ { user_id; user_password } ->
             (match State.find_user state user_id with
              | Some user ->
                (match String.equal user.user_password user_password with
-                | true -> Ok user
-                | false -> Or_error.error_string "Incorrect password!")
-             | None -> Or_error.error_string "Unknown username!")
+                | true -> Protocol.Login.Response.Ok user
+                | false -> Incorrect_password)
+             | None -> Unknown_username)
             |> return)
         ; Rpc.Rpc.implement
             Protocol.Send_message.rpc
@@ -44,33 +43,25 @@ let start ~port =
         ; Rpc.Rpc.implement
             Protocol.Create_conversation.rpc
             (fun _ { conversation_id; user_id } ->
-               let result =
-                 match State.mem_conversation state conversation_id with
-                 | true ->
-                   Or_error.error_string
-                     ("Conversation already exists with conversation ID: "
-                      ^ conversation_id)
-                 | false ->
-                   let new_conversation : Types.Conversation.t =
-                     { conversation_id; messages = [] }
-                   in
-                   State.add_conversation_exn state new_conversation;
-                   State.add_user_to_conversation state ~user_id ~conversation_id;
-                   Ok ()
-               in
-               return result)
+               (match State.mem_conversation state conversation_id with
+                | true -> Protocol.Create_conversation.Response.Conversation_name_taken
+                | false ->
+                  let new_conversation : Types.Conversation.t =
+                    { conversation_id; messages = [] }
+                  in
+                  State.add_conversation_exn state new_conversation;
+                  State.add_user_to_conversation state ~user_id ~conversation_id;
+                  Ok)
+               |> return)
         ; Rpc.Rpc.implement
             Protocol.Add_conversation_user.rpc
             (fun _ { conversation_id; user_id } ->
                let result =
                  match State.mem_conversation state conversation_id with
-                 | false ->
-                   Or_error.error_string
-                     ("Conversation does not exist for conversation ID: "
-                      ^ conversation_id)
+                 | false -> Protocol.Add_conversation_user.Response.Unknown_conversation
                  | true ->
                    State.add_user_to_conversation state ~user_id ~conversation_id;
-                   Ok ()
+                   Ok
                in
                return result)
         ]

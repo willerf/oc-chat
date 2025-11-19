@@ -57,7 +57,7 @@ let sign_up_component ~set_page =
     ; Vdom.Node.input
         ~attrs:
           [ Vdom.Attr.type_ "text"
-          ; Vdom.Attr.placeholder "Enter User ID"
+          ; Vdom.Attr.placeholder "Enter Username"
           ; Vdom.Attr.value_prop user_id
           ; Vdom.Attr.on_input (fun _ new_value -> set_user_id new_value)
           ]
@@ -65,7 +65,7 @@ let sign_up_component ~set_page =
     ; Vdom.Node.input
         ~attrs:
           [ Vdom.Attr.type_ "text"
-          ; Vdom.Attr.placeholder "Enter User Password"
+          ; Vdom.Attr.placeholder "Enter Password"
           ; Vdom.Attr.value_prop user_password
           ; Vdom.Attr.on_input (fun _ new_value -> set_user_password new_value)
           ]
@@ -75,10 +75,10 @@ let sign_up_component ~set_page =
           [ Vdom.Attr.on_click (fun _ ->
               let query : Protocol.Sign_up.Query.t = { user_id; user_password } in
               Ui_effect.bind (sign_up_rpc query) ~f:(function
-                | Ok (Ok _) ->
+                | Ok Ok ->
                   Ui_effect.all_unit [ set_error_message ""; set_page Page.Landing ]
-                | Error error | Ok (Error error) ->
-                  set_error_message (Error.to_string_hum error)))
+                | Ok Username_taken -> set_error_message "Username taken"
+                | Error error -> set_error_message (Error.to_string_hum error)))
           ]
         [ Vdom.Node.text "Sign Up" ]
     ; Vdom.Node.text error_message
@@ -112,7 +112,7 @@ let login_component ~set_page ~set_user =
     ; Vdom.Node.input
         ~attrs:
           [ Vdom.Attr.type_ "text"
-          ; Vdom.Attr.placeholder "Enter User ID"
+          ; Vdom.Attr.placeholder "Enter Username"
           ; Vdom.Attr.value_prop user_id
           ; Vdom.Attr.on_input (fun _ new_value -> set_user_id new_value)
           ]
@@ -120,7 +120,7 @@ let login_component ~set_page ~set_user =
     ; Vdom.Node.input
         ~attrs:
           [ Vdom.Attr.type_ "text"
-          ; Vdom.Attr.placeholder "Enter User Password"
+          ; Vdom.Attr.placeholder "Enter Password"
           ; Vdom.Attr.value_prop user_password
           ; Vdom.Attr.on_input (fun _ new_value -> set_user_password new_value)
           ]
@@ -133,8 +133,9 @@ let login_component ~set_page ~set_user =
                 | Ok (Ok user) ->
                   Ui_effect.all_unit
                     [ set_error_message ""; set_user user; set_page Page.UserHome ]
-                | Error error | Ok (Error error) ->
-                  set_error_message (Error.to_string_hum error)))
+                | Ok Unknown_username -> set_error_message "Unknown username"
+                | Ok Incorrect_password -> set_error_message "Incorrect password"
+                | Error error -> set_error_message (Error.to_string_hum error)))
           ]
         [ Vdom.Node.text "Login" ]
     ; Vdom.Node.text error_message
@@ -166,7 +167,7 @@ let user_home_component ~set_page ~set_view_conversation ~(user : Types.User.t V
      ; Vdom.Node.input
          ~attrs:
            [ Vdom.Attr.type_ "text"
-           ; Vdom.Attr.placeholder "Enter new conversation ID"
+           ; Vdom.Attr.placeholder "Enter new conversation name"
            ; Vdom.Attr.value_prop new_conversation
            ; Vdom.Attr.on_input (fun _ new_value -> set_new_conversation new_value)
            ]
@@ -180,18 +181,19 @@ let user_home_component ~set_page ~set_view_conversation ~(user : Types.User.t V
                  }
                in
                Ui_effect.bind (create_conversation_rpc query) ~f:(function
-                 | Ok (Ok _) ->
+                 | Ok Ok ->
                    Ui_effect.all_unit
                      [ set_error_message ""
                      ; set_view_conversation new_conversation
                      ; set_page Page.Conversation
                      ]
-                 | Error error | Ok (Error error) ->
-                   set_error_message (Error.to_string_hum error)))
+                 | Ok Conversation_name_taken ->
+                   set_error_message "Conversation name taken"
+                 | Error error -> set_error_message (Error.to_string_hum error)))
            ]
          [ Vdom.Node.text "Create Conversation" ]
      ; Vdom.Node.text error_message
-     ; Vdom.Node.h1 [ Vdom.Node.text "Select a conversation below!" ]
+     ; Vdom.Node.h1 [ Vdom.Node.text "Conversations" ]
      ]
      @ List.map user.conversations ~f:(fun conversation_id ->
        Vdom.Node.button
@@ -255,7 +257,7 @@ let conversation_component
     ; Vdom.Node.input
         ~attrs:
           [ Vdom.Attr.type_ "text"
-          ; Vdom.Attr.placeholder "Enter user ID"
+          ; Vdom.Attr.placeholder "Enter Username"
           ; Vdom.Attr.value_prop new_user
           ; Vdom.Attr.on_input (fun _ new_value -> set_new_user new_value)
           ]
@@ -269,8 +271,9 @@ let conversation_component
                 }
               in
               Ui_effect.bind (add_conversation_user_rpc query) ~f:(function
-                | Ok (Ok _) -> set_error_message ""
-                | Error error | Ok (Error error) ->
+                | Ok Ok -> set_error_message ""
+                | Ok Unknown_conversation -> set_error_message "Unknown conversation name"
+                | Error error ->
                   Ui_effect.all_unit
                     [ set_error_message (Error.to_string_hum error); set_new_user "" ]))
           ]
@@ -310,10 +313,7 @@ let conversation_component
 let app =
   let%sub page, set_page = Bonsai.state (module Page) ~default_model:Page.Landing in
   let default_user : Types.User.t =
-    { user_id = "Error User ID"
-    ; user_password = "Error User Password"
-    ; conversations = []
-    }
+    { user_id = "Error Username"; user_password = "Error Password"; conversations = [] }
   in
   let%sub user, set_user = Bonsai.state (module Types.User) ~default_model:default_user in
   let%sub view_conversation, set_view_conversation =
