@@ -2,8 +2,8 @@ open! Core
 open! Async
 module Protocol = Oc_chat_common.Protocol
 module Types = Oc_chat_common.Types
-module User_map = Map.Make (Types.User_id)
-module Conversation_map = Map.Make (Types.Conversation_id)
+module User_map = Map.M (Types.User_id)
+module Conversation_map = Map.M (Types.Conversation_id)
 
 module State = struct
   type t =
@@ -11,7 +11,11 @@ module State = struct
     ; mutable conversations : Types.Conversation.t Conversation_map.t
     }
 
-  let create () : t = { users = User_map.empty; conversations = Conversation_map.empty }
+  let create () : t =
+    { users = Map.empty (module Types.User_id)
+    ; conversations = Map.empty (module Types.Conversation_id)
+    }
+  ;;
 end
 
 let start ~port =
@@ -26,8 +30,8 @@ let start ~port =
               | true ->
                 Or_error.error_string ("Username \"" ^ user_id ^ "\" already taken!")
               | false ->
-                let new_user =
-                  { Types.User.Stable.V1.user_id; user_password; conversations = [] }
+                let new_user : Types.User.t =
+                  { user_id; user_password; conversations = [] }
                 in
                 state.users <- Map.add_exn state.users ~key:user_id ~data:new_user;
                 Ok ()
@@ -72,8 +76,8 @@ let start ~port =
                      ("Conversation already exists with conversation ID: "
                       ^ conversation_id)
                  | false ->
-                   let new_conversation =
-                     { Types.Conversation.Stable.V1.conversation_id; messages = [] }
+                   let new_conversation : Types.Conversation.t =
+                     { conversation_id; messages = [] }
                    in
                    state.conversations
                    <- Map.add_exn

@@ -1,3 +1,5 @@
+open! Core
+
 module User_id : sig
   module Stable : sig
     module V1 : sig
@@ -5,7 +7,12 @@ module User_id : sig
     end
   end
 
-  type t = Stable.V1.t [@@deriving bin_io, sexp, equal, compare]
+  type t = Stable.V1.t
+
+  include Comparable.S_plain with type t := t
+
+  val sexp_of_t : t -> Sexp.t
+  val t_of_sexp : Sexp.t -> t
 end
 
 module User_password : sig
@@ -15,7 +22,10 @@ module User_password : sig
     end
   end
 
-  type t = Stable.V1.t [@@deriving bin_io, sexp, equal]
+  type t = Stable.V1.t [@@deriving equal]
+
+  val sexp_of_t : t -> Sexp.t
+  val t_of_sexp : Sexp.t -> t
 end
 
 module Conversation_id : sig
@@ -25,7 +35,12 @@ module Conversation_id : sig
     end
   end
 
-  type t = Stable.V1.t [@@deriving bin_io, sexp, equal, compare]
+  type t = Stable.V1.t
+
+  include Comparable.S_plain with type t := t
+
+  val sexp_of_t : t -> Sexp.t
+  val t_of_sexp : Sexp.t -> t
 end
 
 module Message : sig
@@ -39,7 +54,7 @@ module Message : sig
     end
   end
 
-  type t = Stable.V1.t [@@deriving bin_io, sexp, equal]
+  type t = Stable.V1.t
 end
 
 module Conversation : sig
@@ -53,7 +68,7 @@ module Conversation : sig
     end
   end
 
-  type t = Stable.V1.t [@@deriving bin_io, sexp, equal]
+  type t = Stable.V1.t
 end
 
 module User : sig
@@ -68,5 +83,8 @@ module User : sig
     end
   end
 
-  type t = Stable.V1.t [@@deriving bin_io, sexp, equal]
+  type t = Stable.V1.t [@@deriving equal]
+
+  val sexp_of_t : t -> Sexp.t
+  val t_of_sexp : Sexp.t -> t
 end

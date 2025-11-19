@@ -7,7 +7,12 @@ module User_id = struct
     end
   end
 
-  type t = Stable.V1.t [@@deriving bin_io, sexp, equal, compare]
+  type t = Stable.V1.t
+
+  include Comparable.Make_plain (Stable.V1)
+
+  let sexp_of_t = Stable.V1.sexp_of_t
+  let t_of_sexp = Stable.V1.t_of_sexp
 end
 
 module User_password = struct
@@ -17,7 +22,10 @@ module User_password = struct
     end
   end
 
-  type t = Stable.V1.t [@@deriving bin_io, sexp, equal]
+  type t = Stable.V1.t [@@deriving equal]
+
+  let sexp_of_t = Stable.V1.sexp_of_t
+  let t_of_sexp = Stable.V1.t_of_sexp
 end
 
 module Conversation_id = struct
@@ -27,7 +35,12 @@ module Conversation_id = struct
     end
   end
 
-  type t = Stable.V1.t [@@deriving bin_io, sexp, equal, compare]
+  type t = Stable.V1.t
+
+  include Comparable.Make_plain (Stable.V1)
+
+  let sexp_of_t = Stable.V1.sexp_of_t
+  let t_of_sexp = Stable.V1.t_of_sexp
 end
 
 module Message = struct
@@ -41,7 +54,7 @@ module Message = struct
     end
   end
 
-  type t = Stable.V1.t [@@deriving bin_io, sexp, equal]
+  type t = Stable.V1.t
 end
 
 module Conversation = struct
@@ -55,7 +68,7 @@ module Conversation = struct
     end
   end
 
-  type t = Stable.V1.t [@@deriving bin_io, sexp, equal]
+  type t = Stable.V1.t
 end
 
 module User = struct
@@ -70,5 +83,8 @@ module User = struct
     end
   end
 
-  type t = Stable.V1.t [@@deriving bin_io, sexp, equal]
+  type t = Stable.V1.t [@@deriving equal]
+
+  let sexp_of_t = Stable.V1.sexp_of_t
+  let t_of_sexp = Stable.V1.t_of_sexp
 end

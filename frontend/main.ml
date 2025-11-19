@@ -309,8 +309,8 @@ let conversation_component
 
 let app =
   let%sub page, set_page = Bonsai.state (module Page) ~default_model:Page.Landing in
-  let default_user =
-    { Types.User.Stable.V1.user_id = "Error User ID"
+  let default_user : Types.User.t =
+    { user_id = "Error User ID"
     ; user_password = "Error User Password"
     ; conversations = []
     }
