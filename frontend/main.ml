@@ -175,10 +175,8 @@ let user_home_component ~set_page ~set_view_conversation ~(user : Types.User.t V
      ; Vdom.Node.button
          ~attrs:
            [ Vdom.Attr.on_click (fun _ ->
-               let query =
-                 { Protocol.Create_conversation.Query.user_id = user.user_id
-                 ; conversation_id = new_conversation
-                 }
+               let query : Protocol.Create_conversation.Query.t =
+                 { user_id = user.user_id; conversation_id = new_conversation }
                in
                Ui_effect.bind (create_conversation_rpc query) ~f:(function
                  | Ok Ok ->
@@ -224,8 +222,8 @@ let conversation_component
   in
   let%sub conversation_rpc =
     Rpc_effect.Polling_state_rpc.poll
-      (module Protocol.Get_conversation.Query)
-      (module Protocol.Get_conversation.Diffable)
+      (module Protocol.Get_conversation.Query.Stable.V1)
+      (module Protocol.Get_conversation.Diffable.Stable.V1)
       ~clear_when_deactivated:true
       Protocol.Get_conversation.rpc
       ~where_to_connect:(Rpc_effect.Where_to_connect.Url server_url)
@@ -265,10 +263,8 @@ let conversation_component
     ; Vdom.Node.button
         ~attrs:
           [ Vdom.Attr.on_click (fun _ ->
-              let query =
-                { Protocol.Add_conversation_user.Query.user_id = new_user
-                ; conversation_id = view_conversation
-                }
+              let query : Protocol.Add_conversation_user.Query.t =
+                { user_id = new_user; conversation_id = view_conversation }
               in
               Ui_effect.bind (add_conversation_user_rpc query) ~f:(function
                 | Ok Ok -> set_error_message ""

@@ -10,23 +10,27 @@ let start ~port =
       ~on_unknown_rpc:`Raise
       ~implementations:
         [ Rpc.Rpc.implement Protocol.Sign_up.rpc (fun _ { user_id; user_password } ->
-            (match State.mem_user state user_id with
-             | true -> Protocol.Sign_up.Response.Username_taken
-             | false ->
-               let new_user : Types.User.t =
-                 { user_id; user_password; conversations = [] }
-               in
-               State.add_user_exn state new_user;
-               Ok)
-            |> return)
+            let result : Protocol.Sign_up.Response.t =
+              match State.mem_user state user_id with
+              | true -> Username_taken
+              | false ->
+                let new_user : Types.User.t =
+                  { user_id; user_password; conversations = [] }
+                in
+                State.add_user_exn state new_user;
+                Ok
+            in
+            return result)
         ; Rpc.Rpc.implement Protocol.Login.rpc (fun _ { user_id; user_password } ->
-            (match State.find_user state user_id with
-             | Some user ->
-               (match String.equal user.user_password user_password with
-                | true -> Protocol.Login.Response.Ok user
-                | false -> Incorrect_password)
-             | None -> Unknown_username)
-            |> return)
+            let result : Protocol.Login.Response.t =
+              match State.find_user state user_id with
+              | Some user ->
+                (match String.equal user.user_password user_password with
+                 | true -> Ok user
+                 | false -> Incorrect_password)
+              | None -> Unknown_username
+            in
+            return result)
         ; Rpc.Rpc.implement
             Protocol.Send_message.rpc
             (fun _ { conversation_id; message } ->
@@ -43,22 +47,24 @@ let start ~port =
         ; Rpc.Rpc.implement
             Protocol.Create_conversation.rpc
             (fun _ { conversation_id; user_id } ->
-               (match State.mem_conversation state conversation_id with
-                | true -> Protocol.Create_conversation.Response.Conversation_name_taken
-                | false ->
-                  let new_conversation : Types.Conversation.t =
-                    { conversation_id; messages = [] }
-                  in
-                  State.add_conversation_exn state new_conversation;
-                  State.add_user_to_conversation state ~user_id ~conversation_id;
-                  Ok)
-               |> return)
+               let result : Protocol.Create_conversation.Response.t =
+                 match State.mem_conversation state conversation_id with
+                 | true -> Conversation_name_taken
+                 | false ->
+                   let new_conversation : Types.Conversation.t =
+                     { conversation_id; messages = [] }
+                   in
+                   State.add_conversation_exn state new_conversation;
+                   State.add_user_to_conversation state ~user_id ~conversation_id;
+                   Ok
+               in
+               return result)
         ; Rpc.Rpc.implement
             Protocol.Add_conversation_user.rpc
             (fun _ { conversation_id; user_id } ->
-               let result =
+               let result : Protocol.Add_conversation_user.Response.t =
                  match State.mem_conversation state conversation_id with
-                 | false -> Protocol.Add_conversation_user.Response.Unknown_conversation
+                 | false -> Unknown_conversation
                  | true ->
                    State.add_user_to_conversation state ~user_id ~conversation_id;
                    Ok
