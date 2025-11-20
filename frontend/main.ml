@@ -1,11 +1,21 @@
 open! Core
 open! Bonsai_web
 open! Bonsai.Let_syntax
+open Js_of_ocaml
 module Protocol = Oc_chat_common.Protocol
 module Types = Oc_chat_common.Types
 module Rpc_effect = Bonsai_web.Rpc_effect
 
-let server_url = "ws://localhost:8000/rpc"
+let server_url =
+  let loc = Dom_html.window##.location in
+  let hostname = Js.to_string loc##.hostname in
+  let protocol =
+    match String.prefix (Js.to_string loc##.protocol) 5 with
+    | "https" -> "https"
+    | _ -> "http"
+  in
+  Printf.sprintf "%s://%s:8000/rpc" protocol hostname
+;;
 
 module Page = struct
   type t =
@@ -382,14 +392,29 @@ let conversation_component
   and send_message_rpc = send_message_rpc
   and add_conversation_user_rpc = add_conversation_user_rpc in
   let open Vdom in
+  let send_message () =
+    if String.is_empty (String.strip message)
+    then Effect.Ignore
+    else (
+      let query : Protocol.Send_message.Query.t =
+        { conversation_id = view_conversation
+        ; message = { user_id = user.user_id; text = message }
+        }
+      in
+      let send_effect = send_message_rpc query |> Effect.ignore_m in
+      Effect.Many [ send_effect; set_message "" ])
+  in
   let message_board_children =
     match conversation_rpc.last_ok_response with
     | None -> [ Node.text "No messages yet..." ]
     | Some (_, conversation) ->
       let ordered_messages = List.rev conversation.messages in
       List.map ordered_messages ~f:(fun msg ->
+        let message_class =
+          if String.equal msg.user_id user.user_id then "message-self" else "message-other"
+        in
         Node.div
-          ~attrs:[ Attr.class_ "message" ]
+          ~attrs:[ Attr.classes [ "message"; message_class ] ]
           [ Node.div ~attrs:[ Attr.class_ "message-author" ] [ Node.text msg.user_id ]
           ; Node.text msg.text
           ])
@@ -466,19 +491,14 @@ let conversation_component
                       ; Attr.placeholder "Type a message"
                       ; Attr.value_prop message
                       ; Attr.on_input (fun _ new_value -> set_message new_value)
+                      ; Attr.on_keydown (fun event ->
+                          if event##.keyCode = 13 then send_message () else Effect.Ignore)
                       ]
                     ()
                 ; Node.button
                     ~attrs:
                       [ Attr.classes [ "btn"; "btn-primary" ]
-                      ; Attr.on_click (fun _ ->
-                          let query : Protocol.Send_message.Query.t =
-                            { conversation_id = view_conversation
-                            ; message = { user_id = user.user_id; text = message }
-                            }
-                          in
-                          let send_effect = send_message_rpc query |> Effect.ignore_m in
-                          Effect.Many [ send_effect; set_message "" ])
+                      ; Attr.on_click (fun _ -> send_message ())
                       ]
                     [ Node.text "Send" ]
                 ]
