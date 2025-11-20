@@ -43,6 +43,17 @@ let start ~state ~port =
                return (State.find_conversation_exn state conversation_id))
           |> Rpc.Implementation.lift ~f:(fun connection_state ->
             connection_state, connection_state)
+        ; Polling_state_rpc.implement
+            ~on_client_and_server_out_of_sync:print_s
+            ~for_first_request:(fun _ user_id ->
+              let user = State.find_user_exn state user_id in
+              return user.conversations)
+            Protocol.Get_conversations.rpc
+            (fun _ user_id ->
+               let user = State.find_user_exn state user_id in
+               return user.conversations)
+          |> Rpc.Implementation.lift ~f:(fun connection_state ->
+            connection_state, connection_state)
         ; Rpc.Rpc.implement
             Protocol.Create_conversation.rpc
             (fun _ { conversation_id; user_id } ->

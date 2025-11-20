@@ -149,6 +149,43 @@ module Get_conversation = struct
   ;;
 end
 
+module Get_conversations = struct
+  module Query = struct
+    module Stable = struct
+      module V1 = struct
+        type t = Types.User_id.Stable.V1.t [@@deriving bin_io, equal, sexp]
+      end
+    end
+
+    type t = Stable.V1.t [@@deriving equal]
+  end
+
+  module Diffable = struct
+    module Stable = struct
+      module V1 = struct
+        module T = struct
+          type t = Types.Conversation_id.Stable.V1.t list
+          [@@deriving bin_io, equal, sexp]
+        end
+
+        include T
+        include Diffable.Atomic.Make (T)
+      end
+    end
+
+    type t = Stable.V1.t
+  end
+
+  let rpc =
+    Polling_state_rpc.create
+      ~name:"get-conversations"
+      ~version:1
+      ~query_equal:Query.Stable.V1.equal
+      ~bin_query:Query.Stable.V1.bin_t
+      (module Diffable.Stable.V1)
+  ;;
+end
+
 module Create_conversation = struct
   module Query = struct
     module Stable = struct

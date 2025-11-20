@@ -24,6 +24,7 @@ val create : unit -> t
 val mem_user : t -> Types.User_id.t -> bool
 val add_user_exn : t -> Types.User.t -> unit
 val find_user : t -> Types.User_id.t -> Types.User.t option
+val find_user_exn : t -> Types.User_id.t -> Types.User.t
 val mem_conversation : t -> Types.Conversation_id.t -> bool
 val add_conversation_exn : t -> Types.Conversation.t -> unit
 val find_conversation : t -> Types.Conversation_id.t -> Types.Conversation.t option

@@ -238,6 +238,17 @@ let user_home_component ~set_page ~set_view_conversation ~(user : Types.User.t V
       Protocol.Create_conversation.rpc
       ~where_to_connect:(Rpc_effect.Where_to_connect.Url server_url)
   in
+  let user_id = Value.map user ~f:(fun user -> user.user_id) in
+  let%sub user_conversations_rpc =
+    Rpc_effect.Polling_state_rpc.poll
+      (module Protocol.Get_conversations.Query.Stable.V1)
+      (module Protocol.Get_conversations.Diffable.Stable.V1)
+      ~clear_when_deactivated:true
+      Protocol.Get_conversations.rpc
+      ~where_to_connect:(Rpc_effect.Where_to_connect.Url server_url)
+      ~every:(Time_ns.Span.of_sec 0.1)
+      user_id
+  in
   let%arr set_page = set_page
   and set_view_conversation = set_view_conversation
   and user = user
@@ -245,15 +256,20 @@ let user_home_component ~set_page ~set_view_conversation ~(user : Types.User.t V
   and set_new_conversation = set_new_conversation
   and error_message = error_message
   and set_error_message = set_error_message
-  and create_conversation_rpc = create_conversation_rpc in
+  and create_conversation_rpc = create_conversation_rpc
+  and user_conversations_rpc = user_conversations_rpc in
   let open Vdom in
   let conversation_list =
-    match user.conversations with
-    | [] ->
+    match user_conversations_rpc.last_ok_response with
+    | None ->
+      Node.p
+        ~attrs:[ Attr.class_ "section-subtext" ]
+        [ Node.text "Loading your conversations..." ]
+    | Some (_, []) ->
       Node.p
         ~attrs:[ Attr.class_ "section-subtext" ]
         [ Node.text "No conversations yet. Create one above to get started." ]
-    | conversations ->
+    | Some (_, conversations) ->
       Node.div
         ~attrs:[ Attr.class_ "conversation-list" ]
         (List.map conversations ~f:(fun conversation_id ->

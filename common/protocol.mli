@@ -119,6 +119,32 @@ module Get_conversation : sig
   val rpc : (Query.t, Diffable.t) Polling_state_rpc.t
 end
 
+module Get_conversations : sig
+  module Query : sig
+    module Stable : sig
+      module V1 : sig
+        type t = Types.User_id.Stable.V1.t [@@deriving bin_io, equal, sexp]
+      end
+    end
+
+    type t = Stable.V1.t
+  end
+
+  module Diffable : sig
+    module Stable : sig
+      module V1 : sig
+        type t = Types.Conversation_id.Stable.V1.t list [@@deriving bin_io, equal, sexp]
+
+        include Polling_state_rpc.Diffable with type t := t
+      end
+    end
+
+    type t = Stable.V1.t
+  end
+
+  val rpc : (Query.t, Diffable.t) Polling_state_rpc.t
+end
+
 module Create_conversation : sig
   module Query : sig
     module Stable : sig

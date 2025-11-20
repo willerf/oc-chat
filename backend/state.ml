@@ -41,6 +41,7 @@ let add_user_exn (t : t) (user : Types.User.t) =
 ;;
 
 let find_user (t : t) = Map.find t.users
+let find_user_exn (t : t) = Map.find_exn t.users
 let mem_conversation (t : t) = Map.mem t.conversations
 
 let add_conversation_exn (t : t) (conversation : Types.Conversation.t) =

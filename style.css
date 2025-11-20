@@ -174,13 +174,12 @@ input {
 
 .conversation-list {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 10px;
 }
 
 .conversation-list button {
-  flex: 1 0 auto;
-  min-width: 140px;
+  width: 100%;
 }
 
 .message-board {
