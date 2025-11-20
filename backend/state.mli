@@ -1,8 +1,22 @@
 open! Core
+open! Async
 module Protocol = Oc_chat_common.Protocol
 module Types = Oc_chat_common.Types
 module User_map : module type of Map.M (Types.User_id)
 module Conversation_map : module type of Map.M (Types.Conversation_id)
+
+module Persist : sig
+  module Stable : sig
+    module V1 : sig
+      type t [@@deriving bin_io]
+
+      val load : filepath:string -> t Or_error.t Deferred.t
+      val write : filepath:string -> persist:t -> unit Deferred.t
+    end
+  end
+
+  type t = Stable.V1.t
+end
 
 type t
 
@@ -26,3 +40,6 @@ val add_message
   -> conversation_id:Types.Conversation_id.t
   -> message:Types.Message.t
   -> unit
+
+val to_persist : t -> Persist.t
+val of_persist : Persist.t -> t

@@ -1,4 +1,11 @@
 (executable
  (public_name oc-chat-backend)
  (name main)
- (libraries oc_chat_common core async async_rpc_websocket))
+ (libraries
+  oc_chat_common
+  core
+  async
+  async_rpc_websocket
+  core_unix.command_unix)
+ (preprocess
+  (pps ppx_jane)))

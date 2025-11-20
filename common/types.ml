@@ -3,7 +3,7 @@ open! Core
 module User_id = struct
   module Stable = struct
     module V1 = struct
-      type t = string [@@deriving bin_io, sexp, equal, compare]
+      type t = String.Stable.V1.t [@@deriving bin_io, sexp, equal, compare]
     end
   end
 

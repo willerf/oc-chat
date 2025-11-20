@@ -3,7 +3,7 @@ open! Core
 module User_id : sig
   module Stable : sig
     module V1 : sig
-      type t = string [@@deriving bin_io, sexp, equal, compare]
+      type t = String.Stable.V1.t [@@deriving bin_io, sexp, equal, compare]
     end
   end
 

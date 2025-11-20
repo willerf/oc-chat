@@ -3,8 +3,7 @@ open! Async
 module Protocol = Oc_chat_common.Protocol
 module Types = Oc_chat_common.Types
 
-let start ~port =
-  let state = State.create () in
+let start ~state ~port =
   let implementations =
     Rpc.Implementations.create_exn
       ~on_unknown_rpc:`Raise
@@ -81,8 +80,29 @@ let start ~port =
     ()
 ;;
 
-let () =
-  let server = start ~port:8000 in
-  don't_wait_for (server >>| ignore);
-  never_returns (Scheduler.go ())
+let command =
+  Command.async
+    ~summary:"Run chat server"
+    (let%map_open.Command state_file = anon ("STATE_FILE" %: string)
+     and port =
+       flag "-port" (optional_with_default 8000 int) ~doc:"INT TCP port to listen on"
+     in
+     fun () ->
+       let%bind state = State.Persist.Stable.V1.load ~filepath:state_file in
+       let state =
+         match state with
+         | Ok persist -> State.of_persist persist
+         | Error _ -> State.create ()
+       in
+       Signal.handle [ Signal.int; Signal.term ] ~f:(fun signal ->
+         eprintf "Got %s, shutting down\n%!" (Signal.to_string signal);
+         Shutdown.shutdown 0);
+       Shutdown.at_shutdown (fun () ->
+         let persist = State.to_persist state in
+         State.Persist.Stable.V1.write ~filepath:state_file ~persist);
+       let server = start ~state ~port >>| ignore in
+       don't_wait_for (server >>| ignore);
+       Deferred.never ())
 ;;
+
+let () = Command_unix.run command
