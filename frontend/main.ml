@@ -6,7 +6,6 @@ module Types = Oc_chat_common.Types
 module Rpc_effect = Bonsai_web.Rpc_effect
 
 let server_url = "ws://localhost:8000/rpc"
-let _ = ignore server_url
 
 module Page = struct
   type t =
@@ -20,14 +19,33 @@ end
 
 let landing_component ~set_page =
   let%arr set_page = set_page in
-  Vdom.Node.div
-    [ Vdom.Node.h1 [ Vdom.Node.text "Web Chat" ]
-    ; Vdom.Node.button
-        ~attrs:[ Vdom.Attr.on_click (fun _ -> set_page Page.Login) ]
-        [ Vdom.Node.text "Login" ]
-    ; Vdom.Node.button
-        ~attrs:[ Vdom.Attr.on_click (fun _ -> set_page Page.SignUp) ]
-        [ Vdom.Node.text "Sign Up" ]
+  let open Vdom in
+  Node.div
+    ~attrs:[ Attr.classes [ "page-root"; "home-root" ] ]
+    [ Node.div
+        ~attrs:[ Attr.class_ "card" ]
+        [ Node.h1
+            ~attrs:[ Attr.classes [ "card-title"; "home-title" ] ]
+            [ Node.text "Web Chat" ]
+        ; Node.p
+            ~attrs:[ Attr.class_ "card-subtitle" ]
+            [ Node.text "A lightweight chat space for quick conversations." ]
+        ; Node.div
+            ~attrs:[ Attr.classes [ "btn-row"; "home-buttons" ] ]
+            [ Node.button
+                ~attrs:
+                  [ Attr.classes [ "btn"; "btn-primary" ]
+                  ; Attr.on_click (fun _ -> set_page Page.Login)
+                  ]
+                [ Node.text "Log In" ]
+            ; Node.button
+                ~attrs:
+                  [ Attr.classes [ "btn"; "btn-secondary" ]
+                  ; Attr.on_click (fun _ -> set_page Page.SignUp)
+                  ]
+                [ Node.text "Create Account" ]
+            ]
+        ]
     ]
 ;;
 
@@ -52,36 +70,70 @@ let sign_up_component ~set_page =
   and error_message = error_message
   and set_error_message = set_error_message
   and sign_up_rpc = sign_up_rpc in
-  Vdom.Node.div
-    [ Vdom.Node.h1 [ Vdom.Node.text "Sign Up" ]
-    ; Vdom.Node.input
-        ~attrs:
-          [ Vdom.Attr.type_ "text"
-          ; Vdom.Attr.placeholder "Enter Username"
-          ; Vdom.Attr.value_prop user_id
-          ; Vdom.Attr.on_input (fun _ new_value -> set_user_id new_value)
-          ]
-        ()
-    ; Vdom.Node.input
-        ~attrs:
-          [ Vdom.Attr.type_ "text"
-          ; Vdom.Attr.placeholder "Enter Password"
-          ; Vdom.Attr.value_prop user_password
-          ; Vdom.Attr.on_input (fun _ new_value -> set_user_password new_value)
-          ]
-        ()
-    ; Vdom.Node.button
-        ~attrs:
-          [ Vdom.Attr.on_click (fun _ ->
-              let query : Protocol.Sign_up.Query.t = { user_id; user_password } in
-              Ui_effect.bind (sign_up_rpc query) ~f:(function
-                | Ok Ok ->
-                  Ui_effect.all_unit [ set_error_message ""; set_page Page.Landing ]
-                | Ok Username_taken -> set_error_message "Username taken"
-                | Error error -> set_error_message (Error.to_string_hum error)))
-          ]
-        [ Vdom.Node.text "Sign Up" ]
-    ; Vdom.Node.text error_message
+  let open Vdom in
+  Node.div
+    ~attrs:[ Attr.classes [ "page-root"; "signup-root" ] ]
+    [ Node.div
+        ~attrs:[ Attr.classes [ "card"; "signup-card" ] ]
+        [ Node.h1
+            ~attrs:[ Attr.classes [ "card-title"; "signup-title" ] ]
+            [ Node.text "Create an account" ]
+        ; Node.p
+            ~attrs:[ Attr.class_ "card-subtitle" ]
+            [ Node.text "Pick credentials to start chatting with friends." ]
+        ; Node.div
+            ~attrs:[ Attr.classes [ "form-stack"; "signup-form" ] ]
+            [ Node.input
+                ~attrs:
+                  [ Attr.classes [ "input"; "signup-input" ]
+                  ; Attr.type_ "text"
+                  ; Attr.placeholder "Username"
+                  ; Attr.value_prop user_id
+                  ; Attr.on_input (fun _ new_value -> set_user_id new_value)
+                  ]
+                ()
+            ; Node.input
+                ~attrs:
+                  [ Attr.classes [ "input"; "signup-input" ]
+                  ; Attr.type_ "password"
+                  ; Attr.placeholder "Password"
+                  ; Attr.value_prop user_password
+                  ; Attr.on_input (fun _ new_value -> set_user_password new_value)
+                  ]
+                ()
+            ; Node.button
+                ~attrs:
+                  [ Attr.classes [ "btn"; "btn-primary"; "signup-button" ]
+                  ; Attr.on_click (fun _ ->
+                      let query : Protocol.Sign_up.Query.t = { user_id; user_password } in
+                      Ui_effect.bind (sign_up_rpc query) ~f:(function
+                        | Ok Ok ->
+                          Ui_effect.all_unit
+                            [ set_error_message ""; set_page Page.Landing ]
+                        | Ok Username_taken -> set_error_message "Username taken"
+                        | Error error -> set_error_message (Error.to_string_hum error)))
+                  ]
+                [ Node.text "Sign Up" ]
+            ]
+        ; Node.div
+            ~attrs:[ Attr.classes [ "error-text"; "signup-error" ] ]
+            [ Node.text error_message ]
+        ; Node.div
+            ~attrs:[ Attr.class_ "btn-row" ]
+            [ Node.button
+                ~attrs:
+                  [ Attr.classes [ "btn"; "btn-secondary" ]
+                  ; Attr.on_click (fun _ -> set_page Page.Landing)
+                  ]
+                [ Node.text "Back" ]
+            ; Node.button
+                ~attrs:
+                  [ Attr.classes [ "btn"; "btn-ghost" ]
+                  ; Attr.on_click (fun _ -> set_page Page.Login)
+                  ]
+                [ Node.text "Already have an account?" ]
+            ]
+        ]
     ]
 ;;
 
@@ -107,38 +159,70 @@ let login_component ~set_page ~set_user =
   and error_message = error_message
   and set_error_message = set_error_message
   and login_rpc = login_rpc in
-  Vdom.Node.div
-    [ Vdom.Node.h1 [ Vdom.Node.text "Login" ]
-    ; Vdom.Node.input
-        ~attrs:
-          [ Vdom.Attr.type_ "text"
-          ; Vdom.Attr.placeholder "Enter Username"
-          ; Vdom.Attr.value_prop user_id
-          ; Vdom.Attr.on_input (fun _ new_value -> set_user_id new_value)
-          ]
-        ()
-    ; Vdom.Node.input
-        ~attrs:
-          [ Vdom.Attr.type_ "text"
-          ; Vdom.Attr.placeholder "Enter Password"
-          ; Vdom.Attr.value_prop user_password
-          ; Vdom.Attr.on_input (fun _ new_value -> set_user_password new_value)
-          ]
-        ()
-    ; Vdom.Node.button
-        ~attrs:
-          [ Vdom.Attr.on_click (fun _ ->
-              let query : Protocol.Login.Query.t = { user_id; user_password } in
-              Ui_effect.bind (login_rpc query) ~f:(function
-                | Ok (Ok user) ->
-                  Ui_effect.all_unit
-                    [ set_error_message ""; set_user user; set_page Page.UserHome ]
-                | Ok Unknown_username -> set_error_message "Unknown username"
-                | Ok Incorrect_password -> set_error_message "Incorrect password"
-                | Error error -> set_error_message (Error.to_string_hum error)))
-          ]
-        [ Vdom.Node.text "Login" ]
-    ; Vdom.Node.text error_message
+  let open Vdom in
+  Node.div
+    ~attrs:[ Attr.class_ "page-root" ]
+    [ Node.div
+        ~attrs:[ Attr.class_ "card" ]
+        [ Node.h1 ~attrs:[ Attr.class_ "card-title" ] [ Node.text "Welcome back" ]
+        ; Node.p
+            ~attrs:[ Attr.class_ "card-subtitle" ]
+            [ Node.text "Sign in to see your conversations." ]
+        ; Node.div
+            ~attrs:[ Attr.class_ "form-stack" ]
+            [ Node.input
+                ~attrs:
+                  [ Attr.class_ "input"
+                  ; Attr.type_ "text"
+                  ; Attr.placeholder "Username"
+                  ; Attr.value_prop user_id
+                  ; Attr.on_input (fun _ new_value -> set_user_id new_value)
+                  ]
+                ()
+            ; Node.input
+                ~attrs:
+                  [ Attr.class_ "input"
+                  ; Attr.type_ "password"
+                  ; Attr.placeholder "Password"
+                  ; Attr.value_prop user_password
+                  ; Attr.on_input (fun _ new_value -> set_user_password new_value)
+                  ]
+                ()
+            ; Node.button
+                ~attrs:
+                  [ Attr.classes [ "btn"; "btn-primary" ]
+                  ; Attr.on_click (fun _ ->
+                      let query : Protocol.Login.Query.t = { user_id; user_password } in
+                      Ui_effect.bind (login_rpc query) ~f:(function
+                        | Ok (Ok user) ->
+                          Ui_effect.all_unit
+                            [ set_error_message ""
+                            ; set_user user
+                            ; set_page Page.UserHome
+                            ]
+                        | Ok Unknown_username -> set_error_message "Unknown username"
+                        | Ok Incorrect_password -> set_error_message "Incorrect password"
+                        | Error error -> set_error_message (Error.to_string_hum error)))
+                  ]
+                [ Node.text "Log In" ]
+            ]
+        ; Node.div ~attrs:[ Attr.class_ "error-text" ] [ Node.text error_message ]
+        ; Node.div
+            ~attrs:[ Attr.class_ "btn-row" ]
+            [ Node.button
+                ~attrs:
+                  [ Attr.classes [ "btn"; "btn-secondary" ]
+                  ; Attr.on_click (fun _ -> set_page Page.SignUp)
+                  ]
+                [ Node.text "Create account" ]
+            ; Node.button
+                ~attrs:
+                  [ Attr.classes [ "btn"; "btn-ghost" ]
+                  ; Attr.on_click (fun _ -> set_page Page.Landing)
+                  ]
+                [ Node.text "Back" ]
+            ]
+        ]
     ]
 ;;
 
@@ -162,45 +246,79 @@ let user_home_component ~set_page ~set_view_conversation ~(user : Types.User.t V
   and error_message = error_message
   and set_error_message = set_error_message
   and create_conversation_rpc = create_conversation_rpc in
-  Vdom.Node.div
-    ([ Vdom.Node.h1 [ Vdom.Node.text "User Home" ]
-     ; Vdom.Node.input
-         ~attrs:
-           [ Vdom.Attr.type_ "text"
-           ; Vdom.Attr.placeholder "Enter new conversation name"
-           ; Vdom.Attr.value_prop new_conversation
-           ; Vdom.Attr.on_input (fun _ new_value -> set_new_conversation new_value)
-           ]
-         ()
-     ; Vdom.Node.button
-         ~attrs:
-           [ Vdom.Attr.on_click (fun _ ->
-               let query : Protocol.Create_conversation.Query.t =
-                 { user_id = user.user_id; conversation_id = new_conversation }
-               in
-               Ui_effect.bind (create_conversation_rpc query) ~f:(function
-                 | Ok Ok ->
+  let open Vdom in
+  let conversation_list =
+    match user.conversations with
+    | [] ->
+      Node.p
+        ~attrs:[ Attr.class_ "section-subtext" ]
+        [ Node.text "No conversations yet. Create one above to get started." ]
+    | conversations ->
+      Node.div
+        ~attrs:[ Attr.class_ "conversation-list" ]
+        (List.map conversations ~f:(fun conversation_id ->
+           Node.button
+             ~attrs:
+               [ Attr.classes [ "btn"; "btn-secondary" ]
+               ; Attr.on_click (fun _ ->
                    Ui_effect.all_unit
-                     [ set_error_message ""
-                     ; set_view_conversation new_conversation
-                     ; set_page Page.Conversation
-                     ]
-                 | Ok Conversation_name_taken ->
-                   set_error_message "Conversation name taken"
-                 | Error error -> set_error_message (Error.to_string_hum error)))
-           ]
-         [ Vdom.Node.text "Create Conversation" ]
-     ; Vdom.Node.text error_message
-     ; Vdom.Node.h1 [ Vdom.Node.text "Conversations" ]
-     ]
-     @ List.map user.conversations ~f:(fun conversation_id ->
-       Vdom.Node.button
-         ~attrs:
-           [ Vdom.Attr.on_click (fun _ ->
-               Ui_effect.all_unit
-                 [ set_view_conversation conversation_id; set_page Page.Conversation ])
-           ]
-         [ Vdom.Node.text conversation_id ]))
+                     [ set_view_conversation conversation_id; set_page Page.Conversation ])
+               ]
+             [ Node.text conversation_id ]))
+  in
+  Node.div
+    ~attrs:[ Attr.classes [ "page-root"; "dashboard-root" ] ]
+    [ Node.div
+        ~attrs:[ Attr.classes [ "card"; "wide" ] ]
+        [ Node.h1
+            ~attrs:[ Attr.class_ "card-title" ]
+            [ Node.text ("Hi, " ^ user.user_id ^ "!") ]
+        ; Node.p
+            ~attrs:[ Attr.class_ "card-subtitle" ]
+            [ Node.text "Create a new room or jump into an existing one." ]
+        ; Node.div
+            ~attrs:[ Attr.class_ "form-stack" ]
+            [ Node.p
+                ~attrs:[ Attr.class_ "section-title" ]
+                [ Node.text "New conversation" ]
+            ; Node.input
+                ~attrs:
+                  [ Attr.class_ "input"
+                  ; Attr.type_ "text"
+                  ; Attr.placeholder "Conversation name"
+                  ; Attr.value_prop new_conversation
+                  ; Attr.on_input (fun _ new_value -> set_new_conversation new_value)
+                  ]
+                ()
+            ; Node.button
+                ~attrs:
+                  [ Attr.classes [ "btn"; "btn-primary" ]
+                  ; Attr.on_click (fun _ ->
+                      let query : Protocol.Create_conversation.Query.t =
+                        { user_id = user.user_id; conversation_id = new_conversation }
+                      in
+                      Ui_effect.bind (create_conversation_rpc query) ~f:(function
+                        | Ok Ok ->
+                          Ui_effect.all_unit
+                            [ set_error_message ""
+                            ; set_view_conversation new_conversation
+                            ; set_page Page.Conversation
+                            ]
+                        | Ok Conversation_name_taken ->
+                          set_error_message "Conversation name taken"
+                        | Error error -> set_error_message (Error.to_string_hum error)))
+                  ]
+                [ Node.text "Create conversation" ]
+            ; Node.div ~attrs:[ Attr.class_ "error-text" ] [ Node.text error_message ]
+            ]
+        ; Node.div
+            [ Node.p
+                ~attrs:[ Attr.class_ "section-title" ]
+                [ Node.text "Your conversations" ]
+            ; conversation_list
+            ]
+        ]
+    ]
 ;;
 
 let conversation_component
@@ -247,62 +365,109 @@ let conversation_component
   and conversation_rpc = conversation_rpc
   and send_message_rpc = send_message_rpc
   and add_conversation_user_rpc = add_conversation_user_rpc in
-  Vdom.Node.div
-    [ Vdom.Node.h1 [ Vdom.Node.text "Conversation" ]
-    ; Vdom.Node.button
-        ~attrs:[ Vdom.Attr.on_click (fun _ -> set_page Page.UserHome) ]
-        [ Vdom.Node.text "Back" ]
-    ; Vdom.Node.input
-        ~attrs:
-          [ Vdom.Attr.type_ "text"
-          ; Vdom.Attr.placeholder "Enter Username"
-          ; Vdom.Attr.value_prop new_user
-          ; Vdom.Attr.on_input (fun _ new_value -> set_new_user new_value)
-          ]
-        ()
-    ; Vdom.Node.button
-        ~attrs:
-          [ Vdom.Attr.on_click (fun _ ->
-              let query : Protocol.Add_conversation_user.Query.t =
-                { user_id = new_user; conversation_id = view_conversation }
-              in
-              Ui_effect.bind (add_conversation_user_rpc query) ~f:(function
-                | Ok Ok -> set_error_message ""
-                | Ok Unknown_conversation -> set_error_message "Unknown conversation name"
-                | Error error ->
-                  Ui_effect.all_unit
-                    [ set_error_message (Error.to_string_hum error); set_new_user "" ]))
-          ]
-        [ Vdom.Node.text "Add User" ]
-    ; Vdom.Node.text error_message
-    ; Vdom.Node.div
-        [ Vdom.Node.input
-            ~attrs:
-              [ Vdom.Attr.type_ "text"
-              ; Vdom.Attr.placeholder "Type a message"
-              ; Vdom.Attr.value_prop message
-              ; Vdom.Attr.on_input (fun _ new_value -> set_message new_value)
-              ]
-            ()
-        ; Vdom.Node.button
-            ~attrs:
-              [ Vdom.Attr.on_click (fun _ ->
-                  let query : Protocol.Send_message.Query.t =
-                    { conversation_id = view_conversation
-                    ; message = { user_id = user.user_id; text = message }
-                    }
-                  in
-                  let send_effect = send_message_rpc query |> Effect.ignore_m in
-                  Effect.Many [ send_effect; set_message "" ])
-              ]
-            [ Vdom.Node.text "Send" ]
+  let open Vdom in
+  let message_board_children =
+    match conversation_rpc.last_ok_response with
+    | None -> [ Node.text "No messages yet..." ]
+    | Some (_, conversation) ->
+      let ordered_messages = List.rev conversation.messages in
+      List.map ordered_messages ~f:(fun msg ->
+        Node.div
+          ~attrs:[ Attr.class_ "message" ]
+          [ Node.div ~attrs:[ Attr.class_ "message-author" ] [ Node.text msg.user_id ]
+          ; Node.text msg.text
+          ])
+  in
+  Node.div
+    ~attrs:[ Attr.classes [ "page-root"; "conversation-root" ] ]
+    [ Node.div
+        ~attrs:[ Attr.classes [ "card"; "conversation-card" ] ]
+        [ Node.div
+            ~attrs:[ Attr.class_ "conversation-header" ]
+            [ Node.div
+                [ Node.h1
+                    ~attrs:[ Attr.class_ "card-title" ]
+                    [ Node.text view_conversation ]
+                ; Node.p
+                    ~attrs:[ Attr.class_ "card-subtitle" ]
+                    [ Node.text ("Signed in as " ^ user.user_id) ]
+                ]
+            ; Node.button
+                ~attrs:
+                  [ Attr.classes [ "btn"; "btn-secondary" ]
+                  ; Attr.on_click (fun _ -> set_page Page.UserHome)
+                  ]
+                [ Node.text "Back" ]
+            ]
+        ; Node.div
+            [ Node.p ~attrs:[ Attr.class_ "section-title" ] [ Node.text "Invite someone" ]
+            ; Node.div
+                ~attrs:[ Attr.class_ "inline-form" ]
+                [ Node.input
+                    ~attrs:
+                      [ Attr.class_ "input"
+                      ; Attr.type_ "text"
+                      ; Attr.placeholder "Username"
+                      ; Attr.value_prop new_user
+                      ; Attr.on_input (fun _ new_value -> set_new_user new_value)
+                      ]
+                    ()
+                ; Node.button
+                    ~attrs:
+                      [ Attr.classes [ "btn"; "btn-ghost" ]
+                      ; Attr.on_click (fun _ ->
+                          let query : Protocol.Add_conversation_user.Query.t =
+                            { user_id = new_user; conversation_id = view_conversation }
+                          in
+                          Ui_effect.bind (add_conversation_user_rpc query) ~f:(function
+                            | Ok Ok ->
+                              Ui_effect.all_unit [ set_error_message ""; set_new_user "" ]
+                            | Ok Unknown_conversation ->
+                              set_error_message "Unknown conversation name"
+                            | Ok Unknown_user -> set_error_message "Unknown user name"
+                            | Error error ->
+                              Ui_effect.all_unit
+                                [ set_error_message (Error.to_string_hum error)
+                                ; set_new_user ""
+                                ]))
+                      ]
+                    [ Node.text "Add user" ]
+                ]
+            ; Node.div ~attrs:[ Attr.class_ "error-text" ] [ Node.text error_message ]
+            ]
+        ; Node.div
+            [ Node.p ~attrs:[ Attr.class_ "section-title" ] [ Node.text "Messages" ]
+            ; Node.div ~attrs:[ Attr.class_ "message-board" ] message_board_children
+            ]
+        ; Node.div
+            [ Node.p ~attrs:[ Attr.class_ "section-title" ] [ Node.text "Send a message" ]
+            ; Node.div
+                ~attrs:[ Attr.class_ "message-input-row" ]
+                [ Node.input
+                    ~attrs:
+                      [ Attr.class_ "input"
+                      ; Attr.type_ "text"
+                      ; Attr.placeholder "Type a message"
+                      ; Attr.value_prop message
+                      ; Attr.on_input (fun _ new_value -> set_message new_value)
+                      ]
+                    ()
+                ; Node.button
+                    ~attrs:
+                      [ Attr.classes [ "btn"; "btn-primary" ]
+                      ; Attr.on_click (fun _ ->
+                          let query : Protocol.Send_message.Query.t =
+                            { conversation_id = view_conversation
+                            ; message = { user_id = user.user_id; text = message }
+                            }
+                          in
+                          let send_effect = send_message_rpc query |> Effect.ignore_m in
+                          Effect.Many [ send_effect; set_message "" ])
+                      ]
+                    [ Node.text "Send" ]
+                ]
+            ]
         ]
-    ; Vdom.Node.div
-        (match conversation_rpc.last_ok_response with
-         | None -> [ Vdom.Node.text "No messages..." ]
-         | Some (_, conversation) ->
-           List.map conversation.messages ~f:(fun msg ->
-             Vdom.Node.div [ Vdom.Node.text (msg.user_id ^ ": " ^ msg.text) ]))
     ]
 ;;
 

@@ -1,168 +1,256 @@
-/* ===== Reset ===== */
+:root {
+  --bg: #f8fafc;
+  --card-bg: #ffffff;
+  --text: #0f172a;
+  --muted-text: #475569;
+  --border: #e2e8f0;
+  --accent: #2563eb;
+  --accent-dark: #1d4ed8;
+  --error: #b91c1c;
+}
+
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
-/* ===== Page background ===== */
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
-  background: #020617;           /* dark navy */
-  color: #e5e7eb;
-  min-height: 100vh;
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
 }
-
-/* ===== Main app container ===== */
-/* This targets your root:
-   <body>
-     <div tabindex="0" ...>   <-- here
-       ...
-*/
-body > div:first-of-type {
-  width: 75vw;                   /* use the middle ~75% of screen */
-  max-width: 960px;
-  margin: 3rem auto;             /* center horizontally with top/bottom margin */
-  text-align: center;            /* center all text inside */
-}
-
-/* === GLOBAL vertical spacing in the app === */
-/* Any element inside that root div that has a previous sibling
-   gets top margin -> vertical gaps between h1, input, buttons, etc. */
-body > div:first-of-type * + * {
-  margin-top: 1.5rem;            /* change this for more/less spacing */
-}
-
-/* ===== Headings & text ===== */
-h1,
-h2,
-h3 {
-  color: #f9fafb;
-  font-weight: 800;
-}
-
-p,
-label,
-span {
-  color: #e5e7eb;
-  font-size: 0.95rem;
-}
-
-/* ===== Inputs / text boxes / selects ===== */
 
 button,
-input,
-textarea,
-select {
+input {
   font: inherit;
 }
 
-/* Styled controls */
-input[type="text"],
-input[type="password"],
-input[type="email"],
-input[type="number"],
-input[type="search"],
-textarea,
-select {
-  display: block;
-  width: 100%;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-
-  padding: 0.7rem 0.9rem;
-  border-radius: 999px;
-  border: 1px solid #374151;
-  background: #020617;
-  color: #e5e7eb;
-
-  text-align: center;
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease,
-    background-color 0.15s ease;
+.page-root,
+.home-root,
+.signup-root {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background: var(--bg);
 }
 
-/* Focus state */
-input[type="text"]:focus,
-input[type="password"]:focus,
-input[type="email"]:focus,
-input[type="number"]:focus,
-input[type="search"]:focus,
-textarea:focus,
-select:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.45);
-  background-color: #020617;
-}
-
-/* Textareas */
-textarea {
-  min-height: 4.5rem;
-  resize: vertical;
-}
-
-/* ===== Buttons ===== */
-
-button {
-  display: block;
+.card,
+.signup-card {
   width: 100%;
   max-width: 420px;
-  margin-left: auto;
-  margin-right: auto;
+  background: var(--card-bg);
+  border-radius: 18px;
+  padding: 28px 26px 26px;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
-  padding: 0.9rem 1.2rem;
-  border-radius: 999px;
+.card.wide,
+.conversation-card {
+  max-width: 960px;
+  gap: 24px;
+}
+
+.card-title,
+.home-title,
+.signup-title {
+  font-size: 28px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text);
+  margin: 0;
+}
+
+.card-subtitle {
+  font-size: 15px;
+  text-align: center;
+  color: var(--muted-text);
+  margin-top: -6px;
+}
+
+.form-stack,
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.input,
+.signup-input {
+  width: 100%;
+  padding: 11px 13px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #f8fafc;
+  font-size: 15px;
+  transition: border-color 0.12s ease, background 0.12s ease;
+}
+
+.input:focus,
+.signup-input:focus {
+  border-color: var(--accent);
+  background: #ffffff;
+  outline: none;
+}
+
+.btn,
+.home-btn {
   border: none;
-  background: radial-gradient(circle at 0 0, #1d4ed8, #1e40af);
-  color: #f9fafb;
-  font-weight: 700;
-  font-size: 1rem;
-  letter-spacing: 0.02em;
+  border-radius: 999px;
+  padding: 11px 20px;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
-
-  box-shadow:
-    0 18px 35px rgba(15, 23, 42, 0.9),
-    0 0 40px rgba(37, 99, 235, 0.45);
-  transition:
-    transform 0.1s ease,
-    box-shadow 0.1s ease,
-    filter 0.1s ease;
+  transition: transform 0.06s ease, box-shadow 0.12s ease, background 0.12s ease;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
 }
 
-/* Hover/active */
-button:hover {
-  filter: brightness(1.05);
-  transform: translateY(-1px);
-  box-shadow:
-    0 24px 45px rgba(15, 23, 42, 0.95),
-    0 0 55px rgba(37, 99, 235, 0.6);
+.btn:active,
+.home-btn:active {
+  transform: scale(0.98);
 }
 
-button:active {
-  transform: translateY(0);
-  box-shadow:
-    0 12px 24px rgba(15, 23, 42, 0.8),
-    0 0 30px rgba(37, 99, 235, 0.4);
+.btn-primary,
+.home-btn-login,
+.signup-button {
+  background: var(--accent);
+  color: #ffffff;
 }
 
-/* Disabled */
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.btn-primary:hover,
+.home-btn-login:hover,
+.signup-button:hover {
+  background: var(--accent-dark);
+}
+
+.btn-secondary,
+.home-btn-signup {
+  background: #ffffff;
+  color: var(--text);
+  border: 1px solid var(--border);
   box-shadow: none;
 }
 
-/* Optional secondary button */
-button.secondary {
-  background: #111827;
+.btn-ghost {
+  background: transparent;
+  border: 1px dashed var(--border);
+  color: var(--muted-text);
   box-shadow: none;
 }
 
-button.secondary:hover {
-  filter: none;
-  background: #1f2937;
+.btn-row,
+.home-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.error-text,
+.signup-error {
+  font-size: 13px;
+  color: var(--error);
+  text-align: center;
+  min-height: 17px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 8px 0 4px;
+  color: var(--text);
+}
+
+.section-subtext {
+  font-size: 14px;
+  color: var(--muted-text);
+  margin: 0 0 8px;
+}
+
+.conversation-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.conversation-list button {
+  flex: 1 0 auto;
+  min-width: 140px;
+}
+
+.message-board {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  background: #f8fafc;
+  height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.message {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px var(--border);
+  font-size: 14px;
+}
+
+.message-author {
+  color: var(--accent-dark);
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.message-input-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.message-input-row input {
+  flex: 1 1 280px;
+}
+
+.conversation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.inline-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.inline-form input {
+  flex: 1 1 220px;
+}
+
+@media (max-width: 640px) {
+  .card,
+  .signup-card {
+    padding: 22px;
+  }
+
+  .conversation-card {
+    padding: 24px;
+  }
+
+  .message-input-row {
+    flex-direction: column;
+  }
 }

@@ -171,6 +171,7 @@ module Add_conversation_user : sig
         type t =
           | Ok
           | Unknown_conversation
+          | Unknown_user
         [@@deriving bin_io]
       end
     end

@@ -62,9 +62,13 @@ let start ~state ~port =
             Protocol.Add_conversation_user.rpc
             (fun _ { conversation_id; user_id } ->
                let result : Protocol.Add_conversation_user.Response.t =
-                 match State.mem_conversation state conversation_id with
-                 | false -> Unknown_conversation
-                 | true ->
+                 match
+                   ( State.mem_conversation state conversation_id
+                   , State.mem_user state user_id )
+                 with
+                 | false, _ -> Unknown_conversation
+                 | _, false -> Unknown_user
+                 | true, true ->
                    State.add_user_to_conversation state ~user_id ~conversation_id;
                    Ok
                in

@@ -207,6 +207,7 @@ module Add_conversation_user = struct
         type t =
           | Ok
           | Unknown_conversation
+          | Unknown_user
         [@@deriving bin_io]
       end
     end
